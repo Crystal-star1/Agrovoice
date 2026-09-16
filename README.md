@@ -1,28 +1,26 @@
-# AgroVoice Code-Switching Benchmark Audio Dataset
+# AgroVoice — Voice-Based Cassava Disease Advisory Agent
 
-Audio samples used to benchmark speech recognition models for AgroVoice, a voice-based cassava disease advisory agent built for the Sahara CodeSwitch Africa Challenge (Agriculture category).
+Built for the Sahara CodeSwitch Africa Challenge (Agriculture category).
 
-## Description
-Volunteers simulated a Nigerian smallholder farmer describing cassava leaf disease symptoms to a voice-based advisory assistant. Recordings are spontaneous descriptions from a scenario prompt, not scripted reading, to preserve natural code-switching.
+## Problem
+Nigeria is the world's largest cassava producer, but diseases like Cassava Mosaic Disease destroy huge portions of smallholder harvests. Most farmers lack access to expert diagnosis and can't use text-based tools easily.
 
-## Consent
-All recordings were made by consenting volunteers who were informed their voice would be used for this hackathon submission. No personally identifying information is included in the recordings or this dataset.
+## Solution
+A farmer describes a plant problem by voice (in Yoruba-English or Pidgin-English) and uploads a leaf photo. AgroVoice:
+1. Transcribes the code-switched speech via Sahara STT
+2. Matches described symptoms against a cassava disease knowledge base (built from CABI Plantwise and IITA sources)
+3. Classifies the photo using a fine-tuned EfficientNet-B0 model trained on the Cassava Leaf Disease Classification dataset
+4. Fuses both signals into a ranked, confidence-scored diagnosis
+5. Generates a concrete action plan (treatment or resistant-planting-material guidance)
+6. Reads the response back via Sahara TTS, in the farmer's own language
 
-## Metadata
+## Architecture
+- `backend.py` — FastAPI server handling STT, CV inference, symptom matching, fusion, and TTS
+- `AgroVoice.html` — frontend web interface
+- CV training notebook — EfficientNet-B0 fine-tuning on the Cassava Leaf Disease dataset
 
-| File | Language Pair | Domain | Approx. Duration | Device Type | Noise Condition |
-|---|---|---|---|---|---|
-| Data_1... | Pidgin-English | Agriculture (cassava disease) | ~20–30s | Smartphone voice memo | Quiet indoor |
-| Data_2... | Pidgin-English | Agriculture (cassava disease) | ~20–30s | Smartphone voice memo | Quiet indoor |
-| Data_3... | Yoruba-English | Agriculture (cassava disease) | ~20–30s | Smartphone voice memo | Quiet indoor |
-| ... | ... | ... | ... | ... | ... |
+## Benchmark
+See the benchmark report (`.tex`) for a full comparison of 4 speech models (Sahara, Whisper base, Whisper-small-Yoruba, Wav2Vec2-XLSR-53 Nigerian Pidgin) across 17 code-switched clips, including a fairness/disparity analysis, plus a TTS intelligibility benchmark.
 
-*(Fill in actual duration/device/noise per file — even a rough estimate per clip is enough to satisfy the challenge's stated metadata fields: language pair, domain, accent/country, device type, noise conditions.)*
-
-**Accent/Country:** All speakers are Nigerian (Yoruba-English and Nigerian Pidgin-English speakers).
-
-## Format
-Original files are `.m4a`/`.ogg`; converted to 16kHz mono `.wav` for benchmarking.
-
-## Usage
-Used to benchmark four ASR models (Sahara, Whisper base, Whisper-small-Yoruba, Wav2Vec2-XLSR-53 Nigerian Pidgin) — see the full benchmark report for methodology and results.
+## Status
+Submitted for the Sahara CodeSwitch Africa Challenge, September 2026. Documentation and code cleanup ongoing post-submission.r methodology and results.
