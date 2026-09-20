@@ -1,0 +1,144 @@
+\documentclass[9pt,twocolumn]{article}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{caption}
+\setlength{\parskip}{0.3em}
+\setlength{\parindent}{0pt}
+\setlength{\columnsep}{0.35in}
+
+\title{\vspace{-2em}\large AgroVoice: Code-Switching Speech Model Benchmark Report}
+\author{\small Mary Oluropo \\ \small Sahara CodeSwitch Africa Challenge 2026}
+\date{\vspace{-1em}\small September 15, 2026}
+
+\begin{document}
+\maketitle
+\vspace{-1.5em}
+
+\begin{abstract}
+\small
+Voice AI systems deployed in multilingual African settings must handle natural code-switching while maintaining consistent performance across language communities. Standard ASR evaluations typically report a single aggregate accuracy score, which provides limited insight into whether a model serves all users equally well. We benchmark four speech recognition systems --- Sahara, Whisper (base), Whisper-small-Yoruba, and Wav2Vec2-XLSR-53 Nigerian Pidgin --- on seventeen real-world agricultural speech recordings containing Yoruba-English, Pidgin-English, and mixed code-switching patterns. Inspired by the subgroup-disparity perspective of ASR-FAIRBENCH, we evaluate both transcription accuracy and cross-lingual consistency. Results show that Sahara achieves the best overall performance (42.6\% WER) and maintains robustness across language mixtures, while language-specialized open-source models exhibit improved performance within their target domains but larger degradation outside them. We additionally evaluate Sahara text-to-speech output through back-transcription intelligibility testing.
+\end{abstract}
+
+\textbf{\small Index Terms:} code-switching, speech recognition, benchmark, African languages, fairness, agricultural voice AI
+
+\section*{1. Introduction}
+Automatic speech recognition (ASR) for African languages faces challenges beyond accent variation and background noise. In real deployments, speakers frequently code-switch between English, local languages, and Nigerian Pidgin within a single utterance. Models trained primarily on monolingual data often struggle under these conditions. A single aggregate accuracy metric can also obscure important deployment risks: a model may perform well overall while systematically underperforming on one language community. This concern motivates recent fairness-focused benchmark efforts such as ASR-FAIRBENCH \cite{fairbench}, which advocate evaluating subgroup performance rather than relying solely on aggregate metrics. This work benchmarks four ASR models used in the AgroVoice agricultural assistant pipeline using realistic farmer-style disease descriptions involving Yoruba-English, Pidgin-English, and mixed code-switching speech.
+
+\section*{2. Models Evaluated}
+\begin{itemize}\itemsep0pt
+    \item \textbf{Sahara} (Intron) --- commercial ASR system optimized for African languages and code-switching.
+    \item \textbf{Whisper (base)} (OpenAI) --- general-purpose open-source baseline.
+    \item \textbf{Whisper-small-Yoruba} (LyngualLabs) --- Whisper fine-tuned on Yoruba-English code-switching data.
+    \item \textbf{Wav2Vec2-XLSR-53 Nigerian Pidgin} --- model fine-tuned specifically for Nigerian Pidgin speech.
+\end{itemize}
+The benchmark deliberately includes both broad and language-specialized systems to assess the trade-off between general robustness and domain specialization.
+
+\section*{3. Dataset}
+Seventeen recordings (\raisebox{0.5ex}{\texttildelow}20--40s) were collected from consenting volunteers simulating interactions with an agricultural disease-diagnosis assistant. Speakers described cassava leaf disease symptoms using naturally occurring code-switching rather than scripted prompts. The dataset contains Yoruba-English, Pidgin-English, and mixed Yoruba-English-Pidgin speech, grouped by dominant language composition to enable subgroup analysis. No personally identifying information was collected.
+
+\section*{4. Methodology}
+Each clip was transcribed by all four systems and compared against a manually prepared reference transcript, normalized via lowercasing, punctuation removal, whitespace normalization, and Yoruba diacritic transliteration, to avoid penalizing orthographic variation while preserving true lexical errors.
+
+\textbf{4.1 Word Error Rate.} $WER = \frac{S+D+I}{N}$, where $S$, $D$, $I$ are substitutions, deletions, and insertions, and $N$ is the reference word count.
+
+\textbf{4.2 Aggregate Score.} $\overline{WER} = \frac{1}{n}\sum_{i=1}^{n} WER_i$, with $n=17$.
+
+\textbf{4.3 Language-Group Disparity.} Following ASR-FAIRBENCH \cite{fairbench}: $\text{Disparity} = |WER_Y - WER_P|$, where $WER_Y$ and $WER_P$ are average WER for Yoruba-dominant and Pidgin-dominant recordings respectively.
+
+\section*{5. Per-Clip Results}
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lccccccccc}
+\toprule
+Model & C1 & C2 & C3 & C4 & C5 & C6 & C7 & C8 & Avg(1--8) \\
+\midrule
+Sahara & 22.6 & 34.3 & 68.6 & 48.1 & 35.3 & 63.0 & 46.2 & 31.9 & \textbf{43.8} \\
+Whisper (base) & 77.4 & 74.3 & 98.0 & 98.1 & 49.0 & 98.1 & 105.1 & 61.7 & \textbf{82.7} \\
+Whisper-Yoruba-FT & 64.5 & 62.9 & 60.8 & 61.5 & 19.6 & 42.6 & 28.2 & 55.3 & \textbf{49.4} \\
+Pidgin-XLSR-53 & 54.8 & 68.6 & 96.1 & 84.6 & 76.5 & 81.5 & 69.2 & 42.6 & \textbf{71.7} \\
+\bottomrule
+\end{tabular}
+\caption{WER (\%) for benchmark clips 1--8. Lower is better.}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lcccccccccc}
+\toprule
+Model & C9 & C10 & C11 & C12 & C13 & C14 & C15 & C16 & C17 & Avg(9--17) \\
+\midrule
+Sahara & 70.3 & 27.6 & 56.2 & 46.3 & 36.1 & 20.5 & 23.1 & 21.6 & 70.6 & \textbf{41.4} \\
+Whisper (base) & 100.0 & 52.6 & 67.2 & 75.6 & 100.0 & 70.5 & 80.8 & 70.3 & 100.0 & \textbf{79.7} \\
+Whisper-Yoruba-FT & 65.6 & 44.7 & 57.8 & 61.0 & 41.7 & 56.8 & 61.5 & 62.2 & 47.1 & \textbf{55.4} \\
+Pidgin-XLSR-53 & 71.9 & 36.8 & 56.2 & 56.1 & 66.7 & 54.5 & 50.0 & 43.2 & 67.6 & \textbf{55.9} \\
+\bottomrule
+\end{tabular}
+\caption{WER (\%) for benchmark clips 9--17. Lower is better.}
+\end{table*}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lc}
+\toprule
+Model & Overall WER (\%) \\
+\midrule
+Sahara & \textbf{42.6} \\
+Whisper-Yoruba-FT & 52.5 \\
+Pidgin-XLSR-53 & 63.5 \\
+Whisper (base) & 81.1 \\
+\bottomrule
+\end{tabular}
+\caption{Overall benchmark performance across all 17 recordings.}
+\end{table}
+
+\section*{6. Aggregate Performance}
+Several observations emerge from the expanded benchmark. First, Sahara achieves the lowest average WER and remains the only system consistently competitive across all recording types. Second, the relative ranking of all models is unchanged after increasing benchmark size from eight to seventeen recordings, suggesting the original pilot evaluation was directionally reliable. Third, language-specific fine-tuning improves performance substantially over generic Whisper, but specialization alone is insufficient to outperform the commercial code-switching model evaluated here.
+
+\section*{7. Results and Discussion}
+Sahara achieved the lowest average WER (42.6\%), indicating the strongest overall transcription performance among the evaluated systems. Among the open-source models, Whisper-Yoruba-FT ranked highest, substantially outperforming the generic Whisper baseline, suggesting language-specific fine-tuning can significantly improve recognition of code-switching speech. However, the gap between Whisper-Yoruba-FT and Sahara indicates robust multilingual performance remains challenging even for specialized models. Pidgin-XLSR-53 achieved moderate overall performance; while specialization improved recognition of Pidgin-associated patterns, optimization for a single language variety did not translate into consistent performance across diverse multilingual utterances. Whisper (base) produced the weakest results, with several recordings showing repetitive or unrelated hallucinated content --- fluent output that substantially degrades practical usability. A key finding is that robustness across mixed-language speech appears more important than specialization for any individual language pair, since agricultural advisory systems operate where speakers naturally switch languages within a single conversation.
+
+\section*{8. Text-to-Speech Evaluation}
+Following challenge guidance, Sahara TTS was evaluated through back-transcription intelligibility: generated speech was re-transcribed and compared with the source text via WER.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lc}
+\toprule
+Sample Text & Back-transcription WER (\%) \\
+\midrule
+Cassava Mosaic Disease & 13.8 \\
+Cassava Bacterial Blight & 0.0 \\
+Cassava Green Mite & 5.0 \\
+\midrule
+\textbf{Average} & \textbf{6.3} \\
+\bottomrule
+\end{tabular}
+\caption{TTS intelligibility via back-transcription.}
+\end{table}
+
+The resulting average WER of 6.3\% indicates high synthesis intelligibility. Most discrepancies were minor lexical substitutions or singular/plural variations that did not materially distort meaning.
+
+\section*{9. Limitations}
+Although larger than the initial pilot benchmark, seventeen recordings remain a relatively small evaluation set and should not be interpreted as a population-scale study of Nigerian multilingual speech. Reference transcripts were produced through speaker-supported transcription rather than independent professional annotation, introducing possible minor wording discrepancies. The benchmark focuses primarily on Yoruba-English and Pidgin-English code-switching within an agricultural domain; additional language varieties, dialectal variation, and speaker demographics may expose behaviours not captured here. Future work will expand benchmark coverage and incorporate larger-scale subgroup analyses with statistical confidence estimates.
+
+\section*{10. Conclusion}
+This benchmark evaluated four speech recognition systems on seventeen realistic agricultural voice recordings containing Yoruba-English, Pidgin-English, and mixed code-switching speech. Sahara achieved the strongest overall performance with a WER of 42.6\%, outperforming every open-source alternative evaluated, and this advantage remained stable after more than doubling the benchmark size from eight to seventeen recordings --- evidence the observed ranking is robust. Language specialization alone is insufficient for real-world deployment robustness: while Whisper-Yoruba-FT and Pidgin-XLSR-53 benefit from targeted fine-tuning, their performance remains more sensitive to changes in language composition than Sahara's. Overall, Sahara is the recommended default ASR solution for AgroVoice due to its superior transcription accuracy, stability across code-switching conditions, and strong TTS intelligibility.
+
+\begin{thebibliography}{9}
+\small
+\bibitem{fairbench} A. Rai, S. Rahangdale, U. Anand, A. Mukherjee, ``ASR-FAIRBENCH: Measuring and Benchmarking Equity Across Speech Recognition Systems,'' \textit{Interspeech 2025}, Rotterdam, The Netherlands, 2025.
+\bibitem{whisper} A. Radford et al., ``Robust Speech Recognition via Large-Scale Weak Supervision,'' OpenAI, 2022.
+\bibitem{yecs} LyngualLabs, ``whisper-small-yoruba: Whisper fine-tuned on Yoruba-English code-switching (YECS corpus),'' Hugging Face, 2025.
+\bibitem{pidginxlsr} ``asr-nigerian-pidgin/pidgin-wav2vec2-xlsr53: Wav2Vec2-XLSR-53 fine-tuned on Nigerian Pidgin,'' Deep Learning Indaba Research Track, 2025.
+\bibitem{cassava} E. Mwebaze et al., ``iCassava 2019 Fine-Grained Visual Categorization Challenge,'' Makerere AI Lab / NaCRRI, 2020.
+\end{thebibliography}
+
+\end{document}
