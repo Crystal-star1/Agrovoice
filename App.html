@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgroVoice — Cassava Advisor</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', -apple-system, sans-serif;
+    background: #F4F6F1;
+    margin: 0;
+    padding: 0;
+    color: #1B3A1B;
+  }
+  header {
+    background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+    color: white;
+    padding: 2.5em 1.5em 3.5em;
+    text-align: center;
+  }
+  header .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    font-weight: 700;
+    font-size: 1.1em;
+    opacity: 0.9;
+    margin-bottom: 1.2em;
+  }
+  header h1 { font-size: 2em; margin: 0 0 0.3em; }
+  header p { opacity: 0.9; max-width: 340px; margin: 0 auto; }
+  .wrap { max-width: 420px; margin: -2em auto 2em; padding: 0 1.2em; }
+  .upload-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5em;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    margin-bottom: 1.5em;
+  }
+  .upload-card label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9em;
+    margin: 0.9em 0 0.4em;
+    color: #333;
+  }
+  select, input[type="file"] {
+    width: 100%;
+    padding: 0.7em;
+    border-radius: 10px;
+    border: 1.5px dashed #A5D6A7;
+    background: #FAFFFB;
+    font-size: 0.9em;
+  }
+  button {
+    width: 100%;
+    background: #2E7D32;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.9em;
+    font-size: 1em;
+    font-weight: 600;
+    margin-top: 1.3em;
+    cursor: pointer;
+  }
+  button:disabled { background: #A5D6A7; }
+  .spinner { text-align: center; color: #2E7D32; font-weight: 600; display: none; margin-top: 0.8em; }
+  .phone-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: none;
+  }
+  .phone-header {
+    padding: 1.2em 1.4em 0.8em;
+    border-bottom: 1px solid #eee;
+    font-weight: 700;
+    color: #1B3A1B;
+  }
+  .diag-top { display: flex; gap: 0.9em; padding: 1.2em 1.4em; align-items: center; }
+  .diag-top img { width: 64px; height: 64px; object-fit: cover; border-radius: 12px; background: #eee; }
+  .diag-name { font-weight: 700; font-size: 1.05em; margin: 0; }
+  .pill {
+    display: inline-block;
+    margin-top: 0.3em;
+    padding: 0.2em 0.7em;
+    border-radius: 20px;
+    font-size: 0.75em;
+    font-weight: 700;
+    background: #FFF3E0;
+    color: #E65100;
+  }
+  .pill.high { background: #FFEBEE; color: #C62828; }
+  .pill.low { background: #E8F5E9; color: #2E7D32; }
+  .section-title {
+    font-size: 0.8em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #888;
+    padding: 0.8em 1.4em 0.4em;
+  }
+  .transcript-box {
+    margin: 0 1.4em 1em;
+    background: #F4F6F1;
+    border-radius: 10px;
+    padding: 0.8em 1em;
+    font-size: 0.85em;
+    font-style: italic;
+    color: #555;
+  }
+  .conf-row { display: flex; align-items: center; padding: 0.25em 1.4em; font-size: 0.85em; }
+  .conf-label { width: 55px; }
+  .conf-track { flex:1; background:#eee; border-radius:6px; height:14px; margin:0 8px; overflow:hidden;}
+  .conf-fill { height:100%; background:#4CAF50; }
+  .conf-pct { width:36px; text-align:right; color:#555; }
+  .step-row {
+    display: flex;
+    gap: 0.9em;
+    align-items: flex-start;
+    padding: 0.8em 1.4em;
+    border-top: 1px solid #f2f2f2;
+  }
+  .step-icon {
+    width: 34px; height: 34px;
+    background: #E8F5E9;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1em;
+    flex-shrink: 0;
+  }
+  .step-text p { margin: 0 0 0.4em; font-size: 0.85em; color: #555; line-height: 1.4; }
+  audio { width: calc(100% - 2.8em); margin: 1em 1.4em 1.4em; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🌱 AgroVoice</div>
+  <h1>Healthy Cassava, Happy Farm</h1>
+  <p>Describe your plant's problem by voice, snap a photo, get an instant diagnosis</p>
+</header>
+
+<div class="wrap">
+  <div class="upload-card">
+    <label>Language of your voice note</label>
+    <select id="lang">
+      <option value="pcm">Pidgin / English</option>
+      <option value="yo">Yoruba / English</option>
+    </select>
+    <label>🎙️ Upload voice note</label>
+    <input type="file" id="audio" accept=".wav,.mp3,.m4a,.ogg">
+    <label>📷 Upload leaf photo</label>
+    <input type="file" id="image" accept="image/*">
+    <button id="diagnoseBtn" onclick="diagnose()">Diagnose</button>
+    <p class="spinner" id="spinner">Analyzing...</p>
+  </div>
+
+  <div class="phone-card" id="result">
+    <div class="phone-header">Diagnosis Results</div>
+    <div class="diag-top">
+      <img id="previewImg" src="" alt="leaf">
+      <div>
+        <p class="diag-name" id="diagName"></p>
+        <span class="pill" id="confPill"></span>
+      </div>
+    </div>
+    <div class="transcript-box" id="transcript"></div>
+    <div class="section-title">🎙️ Original Voice Note</div>
+    <audio id="uploadedAudioPlayer" controls style="width: calc(100% - 2.8em); margin: 0 1.4em 1em;"></audio>
+    <div class="section-title">Confidence Breakdown</div>
+    <div id="chart"></div>
+    <div class="section-title">What's Happening</div>
+    <div class="step-row"><div class="step-icon">ℹ️</div><div class="step-text" id="explanation"></div></div>
+    <div class="section-title">Treatment Plan</div>
+    <div class="step-row"><div class="step-icon">✅</div><div class="step-text" id="action"></div></div>
+    <audio id="ttsAudio" controls></audio>
+  </div>
+</div>
+
+<script>
+const BACKEND_URL = "https://magenta-coagulant-component.ngrok-free.dev"; // no trailing slash
+
+async function diagnose() {
+  const audioFile = document.getElementById('audio').files[0];
+  const imageFile = document.getElementById('image').files[0];
+  const lang = document.getElementById('lang').value;
+  if (!audioFile || !imageFile) { alert("Please upload both a voice note and a photo."); return; }
+
+  document.getElementById('diagnoseBtn').disabled = true;
+  document.getElementById('spinner').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('previewImg').src = URL.createObjectURL(imageFile);
+  document.getElementById('uploadedAudioPlayer').src = URL.createObjectURL(audioFile);
+
+  const formData = new FormData();
+  formData.append('audio', audioFile);
+  formData.append('image', imageFile);
+  formData.append('lang', lang);
+
+  try {
+    const response = await fetch(`${BACKEND_URL}/diagnose`, {
+      method: 'POST',
+      headers: { 'ngrok-skip-browser-warning': 'true' },
+      body: formData
+    });
+    const data = await response.json();
+
+    if (data.error) { throw new Error(data.error + "\n\n" + data.traceback); }
+
+    document.getElementById('diagName').innerText = data.top_diagnosis;
+    const pill = document.getElementById('confPill');
+    pill.innerText = `${data.confidence}% confidence`;
+    pill.className = 'pill ' + (data.confidence >= 70 ? 'high' : data.confidence >= 40 ? '' : 'low');
+    document.getElementById('transcript').innerText = `"${data.transcript}"`;
+    document.getElementById('explanation').innerHTML = data.explanation_points.map(p => `<p>• ${p}</p>`).join('');
+    document.getElementById('action').innerHTML = data.action_points.map(p => `<p>• ${p}</p>`).join('');
+    document.getElementById('ttsAudio').src = data.tts_audio_url;
+
+    const chartDiv = document.getElementById('chart');
+    chartDiv.innerHTML = '';
+    const sorted = Object.entries(data.fused_scores).sort((a,b) => b[1]-a[1]);
+    for (const [label, val] of sorted) {
+      const pct = Math.round(val*100);
+      chartDiv.innerHTML += `<div class="conf-row"><div class="conf-label">${label}</div><div class="conf-track"><div class="conf-fill" style="width:${pct}%"></div></div><div class="conf-pct">${pct}%</div></div>`;
+    }
+    document.getElementById('result').style.display = 'block';
+  } catch (err) {
+    alert("Something went wrong: " + err.message);
+  } finally {
+    document.getElementById('diagnoseBtn').disabled = false;
+    document.getElementById('spinner').style.display = 'none';
+  }
+}
+</script>
+</body>
+</html>
